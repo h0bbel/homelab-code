@@ -4,7 +4,7 @@
 **Author:** Christian Mohn  
 **License:** MIT
 
-## 📘 Overview
+## Overview
 
 This script connects to a [Portainer](https://www.portainer.io/) instance and generates a Markdown report containing detailed information about all Docker containers and stacks across every environment (endpoint) managed by Portainer.
 
@@ -20,7 +20,7 @@ The output is saved as a `portainer-inventory.md` file.
 
 ---
 
-## 🛠️ Requirements
+## Requirements
 
 - `bash` (tested with macOS default Bash 3.2 and later)
 - [`jq`](https://stedolan.github.io/jq/) for parsing JSON
@@ -29,7 +29,7 @@ The output is saved as a `portainer-inventory.md` file.
 
 ---
 
-## 🔐 Setup
+## Setup
 
 1. Clone/download this script to your system.
 
@@ -41,7 +41,7 @@ USERNAME="your_portainer_user"
 PASSWORD="your_portainer_password"
 ```
 
-## 🚀 Usage
+## Usage
 
 Make the script executable:
 
