@@ -1,6 +1,6 @@
 # Portainer Inventory Script
 
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **Author:** Christian Mohn  
 **License:** MIT
 
