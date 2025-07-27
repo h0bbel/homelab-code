@@ -14,7 +14,7 @@ The report includes:
 - Stacks and their metadata (ID, name, type, status)
 - Grouped containers per stack, categorized by running or stopped state
 - Orphan containers (not part of any stack)
-- Metadata for each container (name, image, status, ports, ID, environment)
+- Metadata for each container (name, image, status, ports, ID, environment, volumes, network)
 
 The output is saved as a `portainer-inventory.md` file.
 
