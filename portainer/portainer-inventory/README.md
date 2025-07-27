@@ -41,6 +41,8 @@ USERNAME="your_portainer_user"
 PASSWORD="your_portainer_password"
 ```
 
+Optinally rename `.env-example` to `.env` and edit with your values.
+
 ## Usage
 
 Make the script executable:
