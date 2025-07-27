@@ -75,12 +75,10 @@ If you want to add a custom header at the top of the generated report, create a 
 
 Example `template/header.md`:
 
-```
-
+``` markdown
 # Internal Infrastructure
 
 This report contains a live snapshot of Docker containers deployed across all environments managed by Portainer.
 
 **Confidential** – For internal use only.
-
 ```
