@@ -1,6 +1,6 @@
 # Infrastructure Scripts & Tools
 
-This repository contains various scripts and tools to help with everyday infrastructure tasks, especially for **VMware vSphere** and **Portainer**.
+This repository contains various scripts and tools to help with everyday infrastructure tasks.
 
 These tools are made to make things easier—like documenting setups, collecting system info, and creating useful reports.
 
