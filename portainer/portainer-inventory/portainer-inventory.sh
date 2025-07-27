@@ -1,15 +1,7 @@
 #!/bin/bash
 
 # --- Versioning ---
-SCRIPT_VERSION="1.0.0"
-
-# --- Load .env ---
-if [[ -f .env ]]; then
-  source .env
-else
-  echo "Missing .env file with PORTAINER_URL, USERNAME, and PASSWORD"
-  exit 1
-fi
+SCRIPT_VERSION="1.1.0"
 
 # --- Show version and exit if requested ---
 if [[ "$1" == "--version" || "$1" == "-v" ]]; then
@@ -19,11 +11,20 @@ fi
 
 echo "Portainer Inventory Script v$SCRIPT_VERSION"
 
-# --- Output settings ---
+# --- Load environment variables ---
+if [[ -f .env ]]; then
+  echo "Loading environment variables from .env"
+  source .env
+else
+  echo "Error: .env file not found. Please create one with PORTAINER_URL, USERNAME, and PASSWORD."
+  exit 1
+fi
+
+# --- Configuration ---
 OUTPUT_FILE="portainer-inventory.md"
 CURRENT_DATE=$(date '+%d/%m/%Y')
 
-# --- Authenticate ---
+# --- Authenticate and get JWT token ---
 echo "Authenticating with Portainer..."
 
 AUTH_RESPONSE=$(curl -s -X POST "$PORTAINER_URL/auth" \
@@ -38,40 +39,55 @@ if [[ "$TOKEN" == "null" || -z "$TOKEN" ]]; then
   exit 1
 fi
 
-echo "Authenticated."
+echo "Authenticated successfully."
 
-# --- Get endpoints ---
+# --- Get all endpoints ---
 echo "Fetching all endpoints..."
 
 ENDPOINTS=$(curl -s -X GET "$PORTAINER_URL/endpoints" \
   -H "Authorization: Bearer $TOKEN")
 
-# --- Get stacks ---
+# --- Get all stacks ---
 echo "Fetching all stacks..."
 
 STACKS=$(curl -s -X GET "$PORTAINER_URL/stacks" \
   -H "Authorization: Bearer $TOKEN")
 
-# --- Begin output ---
-echo "# Portainer Inventory Report" > "$OUTPUT_FILE"
+# --- Start Markdown Output ---
+> "$OUTPUT_FILE"
+
+# --- Include optional custom header if exists ---
+HEADER_FILE="templates/header.md"
+if [[ -f "$HEADER_FILE" ]]; then
+  echo "Found header template: $HEADER_FILE"
+  cat "$HEADER_FILE" >> "$OUTPUT_FILE"
+  echo "" >> "$OUTPUT_FILE"
+else
+  echo "No custom header file found."
+fi
+
+# --- Always include standard header info ---
+echo "# Portainer Inventory Report" >> "$OUTPUT_FILE"
 echo "Generated on ${CURRENT_DATE}" >> "$OUTPUT_FILE"
 echo "Script version: v${SCRIPT_VERSION}" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
-# --- Iterate over endpoints ---
+# --- Iterate over each endpoint ---
 echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
   ENDPOINT_ID=$(echo "$endpoint" | jq -r .Id)
   ENDPOINT_NAME=$(echo "$endpoint" | jq -r .Name)
 
+  echo "Processing environment: $ENDPOINT_NAME (ID: $ENDPOINT_ID)"
+
   echo "## Environment: $ENDPOINT_NAME (ID: $ENDPOINT_ID)" >> "$OUTPUT_FILE"
   echo "" >> "$OUTPUT_FILE"
 
-  # Get containers for this endpoint
+  # --- Get containers for this endpoint ---
   CONTAINERS=$(curl -s -X GET \
     "$PORTAINER_URL/endpoints/$ENDPOINT_ID/docker/containers/json?all=true" \
     -H "Authorization: Bearer $TOKEN")
 
-  # Get stacks for this endpoint
+  # --- Filter stacks for this endpoint ---
   STACKS_FOR_ENDPOINT=$(echo "$STACKS" | jq -c --argjson eid "$ENDPOINT_ID" '.[] | select(.EndpointID == $eid)')
   STACK_IDS=$(echo "$STACKS_FOR_ENDPOINT" | jq -r '.Id')
 
@@ -94,9 +110,9 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
 
     for STATE in "running" "stopped"; do
       if [[ "$STATE" == "running" ]]; then
-        STATE_LABEL="Running"
+        LABEL="Running Containers"
       else
-        STATE_LABEL="Stopped"
+        LABEL="Stopped Containers"
       fi
 
       CONTAINERS_MATCHING=$(echo "$CONTAINERS" | jq -c --arg state "$STATE" --arg stack "$STACK_NAME" '
@@ -108,7 +124,7 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
         continue
       fi
 
-      echo "#### $STATE_LABEL Containers" >> "$OUTPUT_FILE"
+      echo "#### $LABEL" >> "$OUTPUT_FILE"
       echo "" >> "$OUTPUT_FILE"
       echo "| Name | Image | Status | Ports | Environment | ID |" >> "$OUTPUT_FILE"
       echo "|------|-------|--------|-------|-------------|----|" >> "$OUTPUT_FILE"
@@ -128,15 +144,15 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
     done
   done
 
-  # Orphan containers
+  # --- Orphan containers ---
   echo "## Orphan Containers (Not in Any Stack)" >> "$OUTPUT_FILE"
   echo "" >> "$OUTPUT_FILE"
 
   for STATE in "running" "stopped"; do
     if [[ "$STATE" == "running" ]]; then
-      STATE_LABEL="Running"
+      LABEL="Running Containers"
     else
-      STATE_LABEL="Stopped"
+      LABEL="Stopped Containers"
     fi
 
     CONTAINERS_MATCHING=$(echo "$CONTAINERS" | jq -c --arg state "$STATE" '
@@ -148,7 +164,7 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
       continue
     fi
 
-    echo "### $STATE_LABEL Containers" >> "$OUTPUT_FILE"
+    echo "### $LABEL" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     echo "| Name | Image | Status | Ports | Environment | ID |" >> "$OUTPUT_FILE"
     echo "|------|-------|--------|-------|-------------|----|" >> "$OUTPUT_FILE"
@@ -170,4 +186,4 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
   echo "---" >> "$OUTPUT_FILE"
 done
 
-echo "✅ Markdown documentation saved to $OUTPUT_FILE"
+echo "Inventory saved to $OUTPUT_FILE"

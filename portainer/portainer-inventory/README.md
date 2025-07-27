@@ -1,6 +1,6 @@
 # Portainer Inventory Script
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Author:** Christian Mohn  
 **License:** MIT
 
@@ -65,4 +65,20 @@ Check version:
 
 ``` bash
 ./portainer-inventory.sh --version
+```
+
+### Custom Header (Optional)
+
+If you want to add a custom header at the top of the generated report, create a file named `header.md` in `template` directory.
+
+Example `template/header.md`:
+
+```
+
+# Internal Infrastructure
+
+This report contains a live snapshot of Docker containers deployed across all environments managed by Portainer.
+
+**Confidential** – For internal use only.
+
 ```
