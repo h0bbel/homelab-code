@@ -39,3 +39,30 @@ The output is saved as a `portainer-inventory.md` file.
 PORTAINER_URL="http://portainer.example.local/api"
 USERNAME="your_portainer_user"
 PASSWORD="your_portainer_password"
+
+## 🚀 Usage
+
+Make the script executable:
+
+``` bash
+chmod +x portainer-inventory.sh
+
+```
+
+Run it:
+
+``` bash
+./portainer-inventory.sh
+```
+
+The generated Markdown report will be saved as:
+
+``` bash
+portainer-inventory.md
+```
+
+Check version:
+
+``` bash
+./portainer-inventory.sh --version
+```
