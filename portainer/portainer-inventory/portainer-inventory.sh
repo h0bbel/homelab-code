@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- Versioning ---
-SCRIPT_VERSION="1.1.0"
+SCRIPT_VERSION="1.2.0"
 
 # --- Show version and exit if requested ---
 if [[ "$1" == "--version" || "$1" == "-v" ]]; then
@@ -126,18 +126,30 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
 
       echo "#### $LABEL" >> "$OUTPUT_FILE"
       echo "" >> "$OUTPUT_FILE"
-      echo "| Name | Image | Status | Ports | Environment | ID |" >> "$OUTPUT_FILE"
-      echo "|------|-------|--------|-------|-------------|----|" >> "$OUTPUT_FILE"
+      echo "| Name | Image | Status | Ports | Environment | ID | Volumes | Networks |" >> "$OUTPUT_FILE"
+      echo "|------|-------|--------|-------|-------------|----|---------|----------|" >> "$OUTPUT_FILE"
 
       echo "$CONTAINERS_MATCHING" | jq -c '.' | while read -r container; do
+        CONTAINER_ID=$(echo "$container" | jq -r .Id)
         NAME=$(echo "$container" | jq -r '.Names[0]' | sed 's|/||')
         IMAGE=$(echo "$container" | jq -r .Image)
         STATUS=$(echo "$container" | jq -r .State)
-        ID=$(echo "$container" | jq -r .Id | cut -c1-12)
+        ID_SHORT=$(echo "$CONTAINER_ID" | cut -c1-12)
         PORTS=$(echo "$container" | jq -r '[.Ports[]? | "\(.PublicPort):\(.PrivatePort)/\(.Type)"] | join(", ")')
         [[ -z "$PORTS" || "$PORTS" == "-" ]] && PORTS="(none)"
 
-        echo "| $NAME | $IMAGE | $STATUS | $PORTS | $ENDPOINT_NAME | $ID |" >> "$OUTPUT_FILE"
+        # Fetch detailed container info for volumes and networks
+        DETAIL=$(curl -s -X GET \
+          "$PORTAINER_URL/endpoints/$ENDPOINT_ID/docker/containers/$CONTAINER_ID/json" \
+          -H "Authorization: Bearer $TOKEN")
+
+        VOLUMES=$(echo "$DETAIL" | jq -r '[.Mounts[]? | .Destination] | join(", ")')
+        [[ -z "$VOLUMES" ]] && VOLUMES="(none)"
+
+        NETWORKS=$(echo "$DETAIL" | jq -r '.NetworkSettings.Networks | keys | join(", ")')
+        [[ -z "$NETWORKS" ]] && NETWORKS="(none)"
+
+        echo "| $NAME | $IMAGE | $STATUS | $PORTS | $ENDPOINT_NAME | $ID_SHORT | $VOLUMES | $NETWORKS |" >> "$OUTPUT_FILE"
       done
 
       echo "" >> "$OUTPUT_FILE"
@@ -166,18 +178,30 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
 
     echo "### $LABEL" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
-    echo "| Name | Image | Status | Ports | Environment | ID |" >> "$OUTPUT_FILE"
-    echo "|------|-------|--------|-------|-------------|----|" >> "$OUTPUT_FILE"
+    echo "| Name | Image | Status | Ports | Environment | ID | Volumes | Networks |" >> "$OUTPUT_FILE"
+    echo "|------|-------|--------|-------|-------------|----|---------|----------|" >> "$OUTPUT_FILE"
 
     echo "$CONTAINERS_MATCHING" | jq -c '.' | while read -r container; do
+      CONTAINER_ID=$(echo "$container" | jq -r .Id)
       NAME=$(echo "$container" | jq -r '.Names[0]' | sed 's|/||')
       IMAGE=$(echo "$container" | jq -r .Image)
       STATUS=$(echo "$container" | jq -r .State)
-      ID=$(echo "$container" | jq -r .Id | cut -c1-12)
+      ID_SHORT=$(echo "$CONTAINER_ID" | cut -c1-12)
       PORTS=$(echo "$container" | jq -r '[.Ports[]? | "\(.PublicPort):\(.PrivatePort)/\(.Type)"] | join(", ")')
       [[ -z "$PORTS" || "$PORTS" == "-" ]] && PORTS="(none)"
 
-      echo "| $NAME | $IMAGE | $STATUS | $PORTS | $ENDPOINT_NAME | $ID |" >> "$OUTPUT_FILE"
+      # Fetch detailed container info for volumes and networks
+      DETAIL=$(curl -s -X GET \
+        "$PORTAINER_URL/endpoints/$ENDPOINT_ID/docker/containers/$CONTAINER_ID/json" \
+        -H "Authorization: Bearer $TOKEN")
+
+      VOLUMES=$(echo "$DETAIL" | jq -r '[.Mounts[]? | .Destination] | join(", ")')
+      [[ -z "$VOLUMES" ]] && VOLUMES="(none)"
+
+      NETWORKS=$(echo "$DETAIL" | jq -r '.NetworkSettings.Networks | keys | join(", ")')
+      [[ -z "$NETWORKS" ]] && NETWORKS="(none)"
+
+      echo "| $NAME | $IMAGE | $STATUS | $PORTS | $ENDPOINT_NAME | $ID_SHORT | $VOLUMES | $NETWORKS |" >> "$OUTPUT_FILE"
     done
 
     echo "" >> "$OUTPUT_FILE"
