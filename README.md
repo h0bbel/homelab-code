@@ -10,10 +10,8 @@ These tools are made to make things easier—like documenting setups, collecting
 
 | Folder | Description |
 |--------|-------------|
-| `caddy/` | Tools to collect data and generate reports from Caddyfile. |
-| `portainer/` | Tools to collect data and generate reports from a Portainer environment. |
-| `vsphere/` | Scripts for getting info from a VMware vSphere setup. |
-| `common/` | Shared helper scripts and functions. |
-| `docs/` | Example outputs and documentation. |
+| [caddy/](caddy/README.md) | Tools to collect data and generate reports from Caddyfile. |
+| [portainer/](portainer/README.MD) | Tools to collect data and generate reports from a Portainer environment. |
+
 
 ---
