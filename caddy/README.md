@@ -21,7 +21,9 @@ Generate Markdown documentation from a Caddyfile configuration. This script pars
 ### Arguments
 
 CADDYFILE (optional): Path to your Caddyfile (default: ./Caddyfile)
+
 OUTPUT_FILE (optional): Markdown output filename (default: caddy-documentation.md)
+
 HEADER_FILE (optional): Markdown file to prepend as a header (default: templates/header.md if exists)
 
 
