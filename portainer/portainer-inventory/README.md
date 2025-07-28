@@ -16,7 +16,9 @@ The report includes:
 - Orphan containers (not part of any stack)
 - Metadata for each container (name, image, status, ports, ID, environment, volumes, network)
 
-The output is saved as a `portainer-inventory.md` file.
+The output is saved as a `portainer-inventory.md` file. 
+
+[Sample Output](/sample-output.md)
 
 ---
 
