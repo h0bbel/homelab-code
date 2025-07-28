@@ -82,3 +82,7 @@ This report contains a live snapshot of Docker containers deployed across all en
 
 **Confidential** – For internal use only.
 ```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](/LICENSE) file for details.
