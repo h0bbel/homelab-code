@@ -11,7 +11,7 @@ These tools are made to make things easier—like documenting setups, collecting
 | Folder | Description |
 |--------|-------------|
 | [caddy/](caddy/README.md) | Tools to collect data and generate reports from Caddyfile. |
-| [portainer/](portainer/README.MD) | Tools to collect data and generate reports from a Portainer environment. |
+| [portainer/](portainer/README.md) | Tools to collect data and generate reports from a Portainer environment. |
 
 
 ---
