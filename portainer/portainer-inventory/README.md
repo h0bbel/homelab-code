@@ -18,7 +18,7 @@ The report includes:
 
 The output is saved as a `portainer-inventory.md` file. 
 
-[Sample Output](/sample-output.md)
+[Sample Output](sample-output.md)
 
 ---
 
