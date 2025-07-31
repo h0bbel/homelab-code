@@ -50,7 +50,7 @@ CURRENT_DATE=$(date '+%d/%m/%Y')
 # --- Authenticate and get JWT token ---
 echo "Authenticating with Portainer..."
 
-AUTH_RESPONSE=$(curl -s -X POST "$PORTAINER_URL/auth" \
+AUTH_RESPONSE=$(curl -s -k -X POST "$PORTAINER_URL/auth" \
   -H "Content-Type: application/json" \
   -d "{\"Username\":\"$USERNAME\",\"Password\":\"$PASSWORD\"}")
 
@@ -67,13 +67,13 @@ echo "Authenticated successfully."
 # --- Get all endpoints ---
 echo "Fetching all endpoints..."
 
-ENDPOINTS=$(curl -s -X GET "$PORTAINER_URL/endpoints" \
+ENDPOINTS=$(curl -s -k -X GET "$PORTAINER_URL/endpoints" \
   -H "Authorization: Bearer $TOKEN")
 
 # --- Get all stacks ---
 echo "Fetching all stacks..."
 
-STACKS=$(curl -s -X GET "$PORTAINER_URL/stacks" \
+STACKS=$(curl -s -k -X GET "$PORTAINER_URL/stacks" \
   -H "Authorization: Bearer $TOKEN")
 
 # --- Start Markdown Output ---
@@ -106,7 +106,7 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
   echo "" >> "$OUTPUT_FILE"
 
   # --- Get containers for this endpoint ---
-  CONTAINERS=$(curl -s -X GET \
+  CONTAINERS=$(curl -s -k -X GET \
     "$PORTAINER_URL/endpoints/$ENDPOINT_ID/docker/containers/json?all=true" \
     -H "Authorization: Bearer $TOKEN")
 
@@ -162,7 +162,7 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
         [[ -z "$PORTS" || "$PORTS" == "-" ]] && PORTS="(none)"
 
         # Fetch detailed container info for volumes and networks
-        DETAIL=$(curl -s -X GET \
+        DETAIL=$(curl -s -k -X GET \
           "$PORTAINER_URL/endpoints/$ENDPOINT_ID/docker/containers/$CONTAINER_ID/json" \
           -H "Authorization: Bearer $TOKEN")
 
@@ -214,7 +214,7 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
       [[ -z "$PORTS" || "$PORTS" == "-" ]] && PORTS="(none)"
 
       # Fetch detailed container info for volumes and networks
-      DETAIL=$(curl -s -X GET \
+      DETAIL=$(curl -s -k -X GET \
         "$PORTAINER_URL/endpoints/$ENDPOINT_ID/docker/containers/$CONTAINER_ID/json" \
         -H "Authorization: Bearer $TOKEN")
 
