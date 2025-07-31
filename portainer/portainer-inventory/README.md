@@ -1,6 +1,6 @@
 # Portainer Inventory Script
 
-**Version:** 1.2.0  
+**Version:** 1.2.1  
 **Author:** Christian Mohn  
 **License:** MIT
 
@@ -38,9 +38,17 @@ The output is saved as a `portainer-inventory.md` file.
 2. Create a `.env` file in the same directory:
 
 ```ini
-PORTAINER_URL="http://portainer.example.local/api"
-USERNAME="your_portainer_user"
-PASSWORD="your_portainer_password"
+# Portainer API URL (no trailing slash)
+PORTAINER_URL=https://your-portainer.example.com
+
+# Portainer username and password
+USERNAME=admin
+PASSWORD=your-password
+
+# Use insecure SSL connection (true/false)
+# Set to 'true' to allow curl to skip certificate validation (e.g., for self-signed certs)
+USE_INSECURE_SSL=true
+
 ```
 
 Optinally rename `.env-example` to `.env` and edit with your values.
