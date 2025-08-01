@@ -8,7 +8,7 @@
 
 ## [1.2.3] - 01-08-2025
 ### Added
-- Summary section added at the top of the report:
+- Summary section added to the report:
   - Total environments (endpoints)
   - Total stacks
   - Total containers (running and stopped breakdown)
