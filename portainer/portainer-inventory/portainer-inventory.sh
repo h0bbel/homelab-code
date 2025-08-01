@@ -7,7 +7,7 @@
 # [license truncated for brevity, keep full license in real script]
 
 # --- Versioning ---
-SCRIPT_VERSION="1.2.2"
+SCRIPT_VERSION="1.2.3"
 
 # --- Show version and exit if requested ---
 if [[ "$1" == "--version" || "$1" == "-v" ]]; then
@@ -78,6 +78,7 @@ format_uptime() {
     return
   fi
   local start_epoch now_epoch diff
+  # MacOS 'date -j -f' fallback for Linux 'date -d'
   start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${started_at:0:19}" +"%s" 2>/dev/null || date -d "${started_at}" +"%s")
   now_epoch=$(date +%s)
   diff=$((now_epoch - start_epoch))
@@ -93,10 +94,14 @@ format_uptime() {
   fi
 }
 
+TOTAL_RUNNING_CONTAINERS=0
+TOTAL_STOPPED_CONTAINERS=0
+
 # --- Process environments ---
-echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
-  ENDPOINT_ID=$(echo "$endpoint" | jq -r .Id)
-  ENDPOINT_NAME=$(echo "$endpoint" | jq -r .Name)
+ENDPOINT_IDS=($(echo "$ENDPOINTS" | jq -r '.[].Id'))
+
+for ENDPOINT_ID in "${ENDPOINT_IDS[@]}"; do
+  ENDPOINT_NAME=$(echo "$ENDPOINTS" | jq -r --arg eid "$ENDPOINT_ID" '.[] | select(.Id == ($eid|tonumber)) | .Name')
 
   echo "Processing environment: $ENDPOINT_NAME (ID: $ENDPOINT_ID)"
   echo "## Environment: $ENDPOINT_NAME (ID: $ENDPOINT_ID)" >> "$OUTPUT_FILE"
@@ -104,6 +109,12 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
 
   CONTAINERS=$(curl $CURL_OPTS -H "Authorization: Bearer $TOKEN" \
     "$PORTAINER_URL/endpoints/$ENDPOINT_ID/docker/containers/json?all=true")
+
+  RUNNING_COUNT=$(echo "$CONTAINERS" | jq '[.[] | select(.State=="running")] | length')
+  STOPPED_COUNT=$(echo "$CONTAINERS" | jq '[.[] | select(.State!="running")] | length')
+
+  TOTAL_RUNNING_CONTAINERS=$((TOTAL_RUNNING_CONTAINERS + RUNNING_COUNT))
+  TOTAL_STOPPED_CONTAINERS=$((TOTAL_STOPPED_CONTAINERS + STOPPED_COUNT))
 
   STACKS_FOR_ENDPOINT=$(echo "$STACKS" | jq -c --argjson eid "$ENDPOINT_ID" '.[] | select(.EndpointID == $eid)')
   STACK_IDS=$(echo "$STACKS_FOR_ENDPOINT" | jq -r '.Id')
@@ -132,6 +143,7 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
         .[] | select(.Labels["com.docker.stack.namespace"] == $stack) |
         select((.State == $state) or ($state == "stopped" and .State != "running"))')
 
+      # Skip if no containers for this filter
       if [[ -z "$CONTAINERS_MATCHING" ]]; then
         continue
       fi
@@ -178,6 +190,7 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
       .[] | select(.Labels["com.docker.stack.namespace"] == null) |
       select((.State == $state) or ($state == "stopped" and .State != "running"))')
 
+    # Skip if no containers
     if [[ -z "$CONTAINERS_MATCHING" ]]; then
       continue
     fi
@@ -215,5 +228,14 @@ echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
 
   echo "---" >> "$OUTPUT_FILE"
 done
+
+# --- Summary Section ---
+TOTAL_CONTAINERS=$((TOTAL_RUNNING_CONTAINERS + TOTAL_STOPPED_CONTAINERS))
+echo "# Summary" >> "$OUTPUT_FILE"
+echo "" >> "$OUTPUT_FILE"
+echo "- Total Containers: $TOTAL_CONTAINERS" >> "$OUTPUT_FILE"
+echo "- Running Containers: $TOTAL_RUNNING_CONTAINERS" >> "$OUTPUT_FILE"
+echo "- Stopped Containers: $TOTAL_STOPPED_CONTAINERS" >> "$OUTPUT_FILE"
+echo "" >> "$OUTPUT_FILE"
 
 echo "✅ Inventory saved to $OUTPUT_FILE"

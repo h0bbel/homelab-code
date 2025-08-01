@@ -1,45 +1,28 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/).
-
----
-
-## [1.2.2] - 2025-07-31
+## [1.2.3] - 01-08-2025
 ### Added
-- Uptime column in Markdown report (relative time using `State.StartedAt`)
+- Summary section added at the top of the report:
+  - Total environments (endpoints)
+  - Total stacks
+  - Total containers (running and stopped breakdown)
 
----
-
-## [1.2.1] - 2025-07-31
+## [1.2.2] - 01-08-2025
 ### Added
-- `USE_INSECURE_SSL` option in `.env` for skipping SSL verification
-- MIT License header with author credit
+- Container uptime shown as relative time (e.g. 5h, 30m)
 
-### Changed
-- Markdown formatting cleanup
-- Output improved for empty stacks and containers
-- Consistent fallback values for missing data
-
----
-
-## [1.2.0] - 2025-07-30
+## [1.2.1] - 30-07-2025
 ### Added
-- Full Markdown inventory output grouped by stack and container state
-- Support for `header.md` inclusion via `templates/header.md`
-- Markdown tables now include volume and network data
-- Orphaned containers section
+- Support for `USE_INSECURE_SSL` in `.env` to allow insecure SSL certs with curl
 
-### Changed
-- All sensitive config moved to `.env` file
-- Improved authentication failure handling
-- Simplified and consistent terminal output
-
----
-
-## [1.0.0] - 2025-07-27
+## [1.2.0] - 28-07-2025
 ### Added
-- Initial version of script to query Portainer API and output containers
-- Basic table structure grouped by endpoint
+- Support for loading configuration from `.env` file
+- Removed emojis from output for cleaner markdown
+- Optional custom header support via `templates/header.md`
+
+## [1.1.0] - 20-07-2025
+### Added
+- Group containers by stack and state (running/stopped)
+- Volume and network information added to container details
+- Output to markdown file with clear sections and formatting
