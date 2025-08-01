@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.4] - 01-08-2025
+### Changed
+- Reworked uptime reporting to only show actual uptime for running containers. For stopped containers, uptime now displays `(n/a)`.
+- Improved clarity in uptime formatting.
+- Bumped version from 1.2.3 to 1.2.4.
+
 ## [1.2.3] - 01-08-2025
 ### Added
 - Summary section added at the top of the report:
