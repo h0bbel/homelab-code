@@ -24,7 +24,6 @@
 ## [1.2.0] - 28-07-2025
 ### Added
 - Support for loading configuration from `.env` file
-- Removed emojis from output for cleaner markdown
 - Optional custom header support via `templates/header.md`
 
 ## [1.1.0] - 20-07-2025
